@@ -1,0 +1,1453 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>American Life — Private Classes Dashboard</title>
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Geist:wght@300;400;500;600;700&family=Geist+Mono:wght@400;500&display=swap" rel="stylesheet"/>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --navy:#07122B;--navy2:#0D1E42;--navy3:#162554;
+  --blue:#1B4FD8;--blue2:#2563EB;
+  --red:#C41E2E;--gold:#C9993A;--gold2:#E8BA5A;
+  --white:#FAFCFF;--text:#E8EDF8;--muted:#8A9BBF;--dim:#4A5A7A;
+  --border:rgba(255,255,255,0.07);--card:rgba(255,255,255,0.04);
+  --green:#16A34A;--orange:#D97706;--danger:#DC2626;
+}
+html{scroll-behavior:smooth}
+body{font-family:'Geist',sans-serif;background:var(--navy);color:var(--text);min-height:100vh;overflow-x:hidden}
+body::before{content:'';position:fixed;inset:0;background:radial-gradient(ellipse 80% 50% at 20% 0%,rgba(27,79,216,0.12) 0%,transparent 60%),radial-gradient(ellipse 60% 40% at 80% 100%,rgba(196,30,46,0.08) 0%,transparent 50%);pointer-events:none;z-index:0}
+
+/* NAV */
+nav{position:sticky;top:0;z-index:100;background:rgba(7,18,43,0.95);backdrop-filter:blur(20px);border-bottom:1px solid var(--border);padding:0 32px;display:flex;align-items:center;justify-content:space-between;height:64px}
+.nav-logo{display:flex;align-items:center;gap:14px}
+.nav-logo-badge{width:36px;height:36px;border-radius:8px;background:linear-gradient(135deg,var(--blue),var(--red));display:flex;align-items:center;justify-content:center;font-size:16px;font-weight:700;color:#fff;font-family:'Instrument Serif',serif}
+.nav-title{font-family:'Instrument Serif',serif;font-size:18px;color:var(--white)}
+.nav-sub{font-size:11px;color:var(--muted);font-family:'Geist Mono',monospace;letter-spacing:.08em}
+.nav-right{display:flex;align-items:center;gap:16px}
+.nav-date{font-size:12px;color:var(--muted);font-family:'Geist Mono',monospace}
+.nav-badge{padding:4px 12px;border-radius:100px;background:rgba(22,163,74,0.15);border:1px solid rgba(22,163,74,0.3);font-size:11px;color:#4ADE80;font-weight:600;letter-spacing:.06em}
+.refresh-btn{padding:6px 14px;border-radius:8px;border:1px solid var(--border);background:rgba(255,255,255,0.04);color:var(--muted);font-size:11px;cursor:pointer;font-family:'Geist Mono',monospace;transition:all .2s}
+.refresh-btn:hover{background:rgba(255,255,255,0.08);color:var(--text)}
+
+/* MAIN */
+main{position:relative;z-index:1;padding:32px;max-width:1500px;margin:0 auto}
+
+/* SECTION LABEL */
+.section-label{display:flex;align-items:center;gap:10px;margin-bottom:20px;margin-top:8px}
+.section-label-line{flex:1;height:1px;background:var(--border)}
+.section-label span{font-size:10px;font-weight:700;letter-spacing:.15em;text-transform:uppercase;color:var(--dim);white-space:nowrap}
+
+/* KPI GRID */
+.kpi-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:14px;margin-bottom:28px}
+@media(max-width:1100px){.kpi-grid{grid-template-columns:repeat(3,1fr)}}
+@media(max-width:700px){.kpi-grid{grid-template-columns:repeat(2,1fr)}}
+.kpi{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:22px;position:relative;overflow:hidden;transition:transform .2s,border-color .2s;animation:fadeUp .4s ease both}
+.kpi:hover{transform:translateY(-2px);border-color:rgba(255,255,255,0.14)}
+.kpi::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:var(--kpi-color,var(--blue))}
+.kpi-icon{font-size:20px;margin-bottom:10px}
+.kpi-val{font-family:'Instrument Serif',serif;font-size:40px;line-height:1;color:var(--white);margin-bottom:3px}
+.kpi-label{font-size:11px;color:var(--muted);font-weight:500;letter-spacing:.04em}
+.kpi-change{margin-top:10px;font-size:11px;font-family:'Geist Mono',monospace;display:flex;align-items:center;gap:4px}
+.kpi-change.up{color:#4ADE80}.kpi-change.down{color:#F87171}.kpi-change.warn{color:#FBBF24}
+
+/* GRIDS */
+.two-col{display:grid;grid-template-columns:1fr 1fr;gap:18px;margin-bottom:20px}
+.three-col{display:grid;grid-template-columns:1fr 1fr 1fr;gap:18px;margin-bottom:20px}
+.four-col{display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:18px;margin-bottom:20px}
+@media(max-width:1100px){.three-col,.four-col{grid-template-columns:1fr 1fr}}
+@media(max-width:700px){.two-col,.three-col,.four-col{grid-template-columns:1fr}}
+
+/* CARD */
+.card{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:22px;animation:fadeUp .4s ease .2s both}
+.card-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:18px}
+.card-title{font-family:'Instrument Serif',serif;font-size:17px;color:var(--white)}
+.card-badge{padding:3px 10px;border-radius:100px;font-size:11px;font-weight:600;letter-spacing:.05em}
+.badge-red{background:rgba(196,30,46,0.15);border:1px solid rgba(196,30,46,0.3);color:#F87171}
+.badge-gold{background:rgba(201,153,58,0.15);border:1px solid rgba(201,153,58,0.3);color:#FCD34D}
+.badge-green{background:rgba(22,163,74,0.15);border:1px solid rgba(22,163,74,0.3);color:#4ADE80}
+.badge-blue{background:rgba(27,79,216,0.15);border:1px solid rgba(27,79,216,0.3);color:#60A5FA}
+.badge-purple{background:rgba(124,58,237,0.15);border:1px solid rgba(124,58,237,0.3);color:#A78BFA}
+
+/* TABLE */
+.tbl{width:100%;border-collapse:collapse}
+.tbl th{font-size:10px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--dim);padding:0 10px 10px;text-align:left;border-bottom:1px solid var(--border)}
+.tbl td{padding:10px;font-size:13px;color:var(--text);border-bottom:1px solid rgba(255,255,255,0.04);vertical-align:middle}
+.tbl tr:last-child td{border-bottom:none}
+.tbl tr:hover td{background:rgba(255,255,255,0.03)}
+.tbl .name{font-weight:600;color:var(--white)}
+.tbl .code{font-family:'Geist Mono',monospace;font-size:10px;color:var(--dim)}
+.tbl .mono{font-family:'Geist Mono',monospace;font-size:12px}
+.tbl-wrap{overflow-x:auto}
+
+/* STATUS BADGE */
+.status{display:inline-flex;align-items:center;gap:5px;padding:2px 9px;border-radius:100px;font-size:11px;font-weight:600}
+.status::before{content:'';width:5px;height:5px;border-radius:50%;background:currentColor;opacity:.8}
+.s-ok{color:#4ADE80;background:rgba(74,222,128,0.1)}
+.s-warn{color:#FBBF24;background:rgba(251,191,36,0.1)}
+.s-danger{color:#F87171;background:rgba(248,113,113,0.1)}
+.s-blue{color:#60A5FA;background:rgba(96,165,250,0.1)}
+
+/* PROGRESS BAR */
+.pbar-wrap{display:flex;align-items:center;gap:8px}
+.pbar{flex:1;height:5px;background:rgba(255,255,255,0.06);border-radius:100px;overflow:hidden}
+.pbar-fill{height:100%;border-radius:100px;transition:width .8s ease}
+.pbar-ok{background:linear-gradient(90deg,#16A34A,#4ADE80)}
+.pbar-warn{background:linear-gradient(90deg,#D97706,#FBBF24)}
+.pbar-danger{background:linear-gradient(90deg,#DC2626,#F87171)}
+.pbar-val{font-size:10px;font-family:'Geist Mono',monospace;color:var(--muted);min-width:30px;text-align:right}
+
+/* TEACHER ROW */
+.teacher-row{display:flex;align-items:center;gap:10px;margin-bottom:12px}
+.teacher-avatar{width:34px;height:34px;border-radius:9px;background:linear-gradient(135deg,var(--blue),var(--navy3));display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;color:#fff;flex-shrink:0;font-family:'Instrument Serif',serif}
+.teacher-info{flex:1;min-width:0}
+.teacher-name{font-size:13px;font-weight:600;color:var(--white);margin-bottom:2px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.teacher-hrs{font-family:'Geist Mono',monospace;font-size:12px;color:var(--gold2);font-weight:500}
+
+/* ALERT ITEM */
+.alert-item{display:flex;align-items:flex-start;gap:10px;padding:10px 0;border-bottom:1px solid rgba(255,255,255,0.04)}
+.alert-item:last-child{border-bottom:none}
+.alert-icon{width:30px;height:30px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:13px;flex-shrink:0}
+.alert-icon.red{background:rgba(196,30,46,0.15)}
+.alert-icon.gold{background:rgba(201,153,58,0.15)}
+.alert-icon.blue{background:rgba(27,79,216,0.15)}
+.alert-content{flex:1;min-width:0}
+.alert-name{font-size:13px;font-weight:600;color:var(--white);margin-bottom:2px}
+.alert-desc{font-size:11px;color:var(--muted);line-height:1.5}
+
+/* BAR CHART */
+.bar-chart{display:flex;align-items:flex-end;gap:6px;height:110px;margin-top:8px}
+.bar-col{flex:1;display:flex;flex-direction:column;align-items:center;gap:4px}
+.bar-fill{width:100%;border-radius:4px 4px 0 0;background:linear-gradient(180deg,var(--blue2),var(--navy3));transition:height .8s ease;min-height:4px;position:relative}
+.bar-val{font-size:9px;color:var(--dim);font-family:'Geist Mono',monospace;position:absolute;top:-16px;left:50%;transform:translateX(-50%);white-space:nowrap}
+.bar-lbl{font-size:9px;color:var(--dim);font-family:'Geist Mono',monospace;letter-spacing:.03em}
+
+/* PERFORMANCE PILL */
+.perf-pill{display:inline-block;padding:2px 8px;border-radius:6px;font-size:10px;font-weight:600}
+.perf-excellent{background:rgba(74,222,128,0.12);color:#4ADE80}
+.perf-satisfactory{background:rgba(96,165,250,0.12);color:#60A5FA}
+.perf-unsatisfactory{background:rgba(248,113,113,0.12);color:#F87171}
+.perf-absent{background:rgba(148,163,184,0.1);color:#94A3B8}
+
+/* SCROLLABLE CARD BODY */
+.scroll-body{max-height:320px;overflow-y:auto}
+.scroll-body::-webkit-scrollbar{width:4px}
+.scroll-body::-webkit-scrollbar-track{background:transparent}
+.scroll-body::-webkit-scrollbar-thumb{background:var(--border);border-radius:2px}
+
+/* LOADING SPINNER */
+.spinner{display:inline-block;width:14px;height:14px;border:2px solid var(--border);border-top-color:var(--blue2);border-radius:50%;animation:spin .6s linear infinite;vertical-align:middle;margin-right:6px}
+@keyframes spin{to{transform:rotate(360deg)}}
+@keyframes fadeUp{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:translateY(0)}}
+
+/* SEARCH INPUT */
+.search-input{width:100%;padding:8px 12px;background:rgba(13,30,66,0.95);border:1px solid var(--border);border-radius:8px;color:var(--text);font-size:12px;font-family:'Geist',sans-serif;outline:none;margin-bottom:14px;appearance:none;-webkit-appearance:none}
+.search-input::placeholder{color:var(--dim)}
+.search-input:focus{border-color:rgba(27,79,216,0.5);background:rgba(13,30,66,1)}
+.search-input option{background:#0D1E42;color:#E8EDF8;padding:8px}
+select.search-input{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='10' viewBox='0 0 10 10'%3E%3Cpath fill='%238A9BBF' d='M5 7L0 2h10z'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 10px center;padding-right:28px;cursor:pointer}
+
+/* TABS */
+.tabs{display:flex;gap:4px;margin-bottom:16px;background:rgba(255,255,255,0.04);border-radius:10px;padding:4px}
+.tab{flex:1;padding:7px;border-radius:7px;border:none;cursor:pointer;font-size:11px;font-weight:600;letter-spacing:.04em;background:transparent;color:var(--muted);transition:all .2s;font-family:'Geist',sans-serif}
+.tab.active{background:var(--blue);color:#fff;box-shadow:0 2px 8px rgba(27,79,216,0.4)}
+
+/* DONUT SVG */
+.donut-wrap{display:flex;align-items:center;gap:20px}
+.donut-legend{flex:1}
+.legend-item{display:flex;align-items:center;gap:8px;margin-bottom:10px}
+.legend-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0}
+.legend-label{font-size:12px;color:var(--text);flex:1}
+.legend-val{font-size:11px;font-family:'Geist Mono',monospace;color:var(--muted)}
+
+/* REPORT CARD */
+.report-card{background:rgba(255,255,255,0.03);border:1px solid var(--border);border-radius:10px;padding:12px;margin-bottom:8px}
+.report-card:last-child{margin-bottom:0}
+.report-card-header{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:6px}
+.report-student{font-size:13px;font-weight:600;color:var(--white)}
+.report-teacher{font-size:11px;color:var(--muted)}
+.report-date{font-size:10px;font-family:'Geist Mono',monospace;color:var(--dim)}
+.report-text{font-size:11px;color:var(--muted);line-height:1.5;margin-top:4px}
+.report-tags{display:flex;gap:5px;flex-wrap:wrap;margin-top:6px}
+.report-tag{padding:2px 7px;background:rgba(255,255,255,0.05);border-radius:5px;font-size:10px;color:var(--dim)}
+
+/* FOOTER */
+footer{text-align:center;padding:28px;font-size:11px;color:var(--dim);border-top:1px solid var(--border);margin-top:16px;font-family:'Geist Mono',monospace;letter-spacing:.05em}
+
+/* ERROR BANNER */
+.error-banner{background:rgba(196,30,46,0.1);border:1px solid rgba(196,30,46,0.3);border-radius:10px;padding:12px 16px;font-size:12px;color:#F87171;margin-bottom:20px;display:none}
+
+/* ── LOGIN OVERLAY ─────────────────────────────────────── */
+#login-overlay {
+  position: fixed; inset: 0; z-index: 9999;
+  background: #07122B;
+  display: flex; align-items: center; justify-content: center;
+  font-family: 'Geist', sans-serif;
+}
+#login-overlay::before {
+  content: '';
+  position: absolute; inset: 0;
+  background:
+    radial-gradient(ellipse 70% 60% at 15% 10%, rgba(27,79,216,0.18) 0%, transparent 60%),
+    radial-gradient(ellipse 50% 40% at 85% 90%, rgba(196,30,46,0.12) 0%, transparent 55%);
+  pointer-events: none;
+}
+.login-box {
+  position: relative; z-index: 1;
+  width: 100%; max-width: 420px;
+  background: rgba(13,30,66,0.7);
+  border: 1px solid rgba(255,255,255,0.1);
+  border-radius: 24px;
+  padding: 48px 44px;
+  backdrop-filter: blur(24px);
+  box-shadow: 0 32px 80px rgba(0,0,0,0.5), 0 0 0 1px rgba(255,255,255,0.05) inset;
+  animation: loginFadeIn .5s ease;
+}
+@keyframes loginFadeIn {
+  from { opacity: 0; transform: translateY(20px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+.login-logo {
+  display: flex; justify-content: center; margin-bottom: 32px;
+}
+.login-logo img {
+  height: 52px; object-fit: contain; filter: brightness(1.1);
+}
+.login-title {
+  font-family: 'Instrument Serif', serif;
+  font-size: 22px; color: #FAFCFF;
+  text-align: center; margin-bottom: 6px;
+}
+.login-sub {
+  font-size: 11px; color: #4A5A7A;
+  text-align: center; letter-spacing: .1em;
+  text-transform: uppercase; margin-bottom: 36px;
+}
+.login-field {
+  position: relative; margin-bottom: 16px;
+}
+.login-field label {
+  display: block; font-size: 11px; font-weight: 600;
+  color: #8A9BBF; letter-spacing: .08em; text-transform: uppercase;
+  margin-bottom: 8px;
+}
+.login-field input {
+  width: 100%; padding: 14px 48px 14px 16px;
+  background: rgba(255,255,255,0.05);
+  border: 1px solid rgba(255,255,255,0.1);
+  border-radius: 12px;
+  color: #E8EDF8; font-size: 14px;
+  font-family: 'Geist Mono', monospace;
+  outline: none; transition: border-color .2s, background .2s;
+  letter-spacing: .05em;
+}
+.login-field input:focus {
+  border-color: rgba(27,79,216,0.6);
+  background: rgba(27,79,216,0.08);
+}
+.login-field input.error {
+  border-color: rgba(196,30,46,0.6);
+  background: rgba(196,30,46,0.06);
+  animation: shake .3s ease;
+}
+@keyframes shake {
+  0%,100%{transform:translateX(0)}
+  25%{transform:translateX(-6px)}
+  75%{transform:translateX(6px)}
+}
+.show-pw-btn {
+  position: absolute; right: 14px; top: 50%;
+  transform: translateY(-50%);
+  background: none; border: none; cursor: pointer;
+  color: #4A5A7A; font-size: 16px; padding: 4px;
+  transition: color .2s; line-height: 1;
+  margin-top: 10px;
+}
+.show-pw-btn:hover { color: #8A9BBF; }
+.login-btn {
+  width: 100%; padding: 15px;
+  background: linear-gradient(135deg, #1B4FD8, #2563EB);
+  border: none; border-radius: 12px;
+  color: #fff; font-size: 14px; font-weight: 700;
+  font-family: 'Geist', sans-serif;
+  cursor: pointer; letter-spacing: .04em;
+  margin-top: 8px;
+  transition: opacity .2s, transform .1s;
+  box-shadow: 0 8px 24px rgba(27,79,216,0.35);
+}
+.login-btn:hover { opacity: .92; transform: translateY(-1px); }
+.login-btn:active { transform: translateY(0); }
+.login-error {
+  margin-top: 12px; text-align: center;
+  font-size: 12px; color: #F87171;
+  min-height: 18px; transition: opacity .2s;
+}
+.login-footer {
+  margin-top: 28px; text-align: center;
+  font-size: 10px; color: #2A3A5A;
+  letter-spacing: .08em; text-transform: uppercase;
+}
+
+</style>
+</head>
+<body>
+
+
+<!-- ── LOGIN OVERLAY ──────────────────────────────────── -->
+<div id="login-overlay">
+  <div class="login-box">
+    <div class="login-logo">
+      <img src="data:image/png;base64,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" alt="American Life"/>
+    </div>
+    <div class="login-title">Private Classes Dashboard</div>
+    <div class="login-sub">Secure Access · Education & Sales</div>
+
+    <div class="login-field">
+      <label>Password</label>
+      <input type="password" id="pw-input" placeholder="Enter password"
+        onkeydown="if(event.key==='Enter')doLogin()"/>
+      <button class="show-pw-btn" onclick="togglePw()" title="Show/Hide">
+        <span id="pw-eye">👁</span>
+      </button>
+    </div>
+
+    <button class="login-btn" onclick="doLogin()">Access Dashboard →</button>
+    <div class="login-error" id="login-error"></div>
+
+    <div class="login-footer">American Life · 2025–2026 Academic Year</div>
+  </div>
+</div>
+
+<nav>
+  <div class="nav-logo">
+    <img src="data:image/png;base64,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" alt="American Life" style="height:44px;object-fit:contain;filter:brightness(1.1)"/>
+    <div>
+      <div class="nav-title">Private Classes Dashboard</div>
+      <div class="nav-sub">EDUCATION & SALES DASHBOARD</div>
+    </div>
+  </div>
+  <div class="nav-right">
+    <div class="nav-date" id="navDate"></div>
+    <button class="refresh-btn" onclick="loadDashboard()">↻ Refresh</button>
+    <div class="nav-badge" id="liveBadge">● LIVE</div>
+  </div>
+</nav>
+
+<main>
+
+<div class="error-banner" id="errorBanner"></div>
+
+<!-- ── KPI ── -->
+<div class="section-label"><span>Overview</span><div class="section-label-line"></div></div>
+<div class="kpi-grid">
+  <div class="kpi" style="--kpi-color:#2563EB;animation-delay:.05s">
+    <div class="kpi-icon">🎓</div>
+    <div class="kpi-val" id="kpi-students"><span class="spinner"></span></div>
+    <div class="kpi-label">Active Students</div>
+    <div class="kpi-change up" id="kpi-students-sub">Loading...</div>
+  </div>
+  <div class="kpi" style="--kpi-color:#C9993A;animation-delay:.1s">
+    <div class="kpi-icon">⏱️</div>
+    <div class="kpi-val" id="kpi-hours"><span class="spinner"></span></div>
+    <div class="kpi-label">Total Reg. Hours</div>
+    <div class="kpi-change up" id="kpi-hours-sub">Loading...</div>
+  </div>
+  <div class="kpi" style="--kpi-color:#16A34A;animation-delay:.15s">
+    <div class="kpi-icon">📋</div>
+    <div class="kpi-val" id="kpi-sessions"><span class="spinner"></span></div>
+    <div class="kpi-label">Total Sessions</div>
+    <div class="kpi-change up" id="kpi-sessions-sub">Loading...</div>
+  </div>
+  <div class="kpi" style="--kpi-color:#C41E2E;animation-delay:.2s">
+    <div class="kpi-icon">⚠️</div>
+    <div class="kpi-val" id="kpi-risk"><span class="spinner"></span></div>
+    <div class="kpi-label">Students at Risk</div>
+    <div class="kpi-change warn" id="kpi-risk-sub">Loading...</div>
+  </div>
+  <div class="kpi" style="--kpi-color:#7C3AED;animation-delay:.25s">
+    <div class="kpi-icon">👩‍🏫</div>
+    <div class="kpi-val" id="kpi-teachers"><span class="spinner"></span></div>
+    <div class="kpi-label">Active Teachers</div>
+    <div class="kpi-change up" id="kpi-teachers-sub">Loading...</div>
+  </div>
+</div>
+
+<!-- ── EDUCATION ── -->
+<div class="section-label"><span>Education Team</span><div class="section-label-line"></div></div>
+
+<div class="two-col">
+  <!-- Students at Risk -->
+  <div class="card">
+    <div class="card-head">
+      <div class="card-title">Students at Risk</div>
+      <div class="card-badge badge-red" id="risk-badge">Loading</div>
+    </div>
+    <div class="tbl-wrap scroll-body">
+      <table class="tbl">
+        <thead><tr><th>Student</th><th>Teacher</th><th>Remaining</th><th>Last Session</th><th>Status</th></tr></thead>
+        <tbody id="risk-tbody"><tr><td colspan="5" style="text-align:center;padding:20px;color:var(--dim)"><span class="spinner"></span> Loading...</td></tr></tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- Teacher Activity -->
+  <div class="card">
+    <div class="card-head">
+      <div class="card-title">Teacher Activity</div>
+      <div class="card-badge badge-blue">All Time</div>
+    </div>
+    <div id="teacher-list"><div style="text-align:center;padding:20px;color:var(--dim)"><span class="spinner"></span></div></div>
+  </div>
+</div>
+
+<!-- Hours Usage Full Table -->
+<div class="card" style="margin-bottom:20px">
+  <div class="card-head">
+    <div class="card-title">Student Hours Usage</div>
+    <div class="card-badge badge-gold">All Students with Registered Hours</div>
+  </div>
+  <input type="text" class="search-input" id="hours-search" placeholder="🔍  Search student, teacher, level..." oninput="filterHoursTable()" />
+  <div class="tbl-wrap" style="max-height:380px;overflow-y:auto">
+    <table class="tbl">
+      <thead><tr><th>Student</th><th>Level</th><th>Teacher</th><th>Registered</th><th>Used</th><th>Remaining</th><th>Progress</th></tr></thead>
+      <tbody id="hours-tbody"><tr><td colspan="7" style="text-align:center;padding:20px;color:var(--dim)"><span class="spinner"></span></td></tr></tbody>
+    </table>
+  </div>
+</div>
+
+<!-- Recent Reports Full Table -->
+<div class="card" style="margin-bottom:20px">
+  <div class="card-head">
+    <div class="card-title">All Session Reports</div>
+    <div class="card-badge badge-blue" id="reports-badge">Loading</div>
+  </div>
+  <div style="display:flex;gap:8px;margin-bottom:14px;flex-wrap:wrap">
+    <input type="text" class="search-input" id="report-search" placeholder="🔍  Search by student, teacher, lesson content..." oninput="filterReports()" onkeyup="filterReports()" style="margin-bottom:0;flex:1;min-width:200px"/>
+    <select id="report-filter-perf" class="search-input" style="width:160px;margin-bottom:0" onchange="filterReports()">
+      <option value="">All Performance</option>
+      <option value="Excellent">Excellent</option>
+      <option value="Satisfactory">Satisfactory</option>
+      <option value="Unsatisfactory">Unsatisfactory</option>
+      <option value="Absent">Absent</option>
+    </select>
+    <select id="report-filter-hw" class="search-input" style="width:140px;margin-bottom:0" onchange="filterReports()">
+      <option value="">All Homework</option>
+      <option value="Done">Done</option>
+      <option value="Undone">Undone</option>
+    </select>
+  </div>
+  <div class="tbl-wrap" style="max-height:400px;overflow-y:auto">
+    <table class="tbl">
+      <thead><tr><th>Date</th><th>Student</th><th>Teacher</th><th>Level</th><th>Classroom</th><th>Lesson#</th><th>Performance</th><th>Participation</th><th>HW</th><th>Summary</th><th>Next Plan</th><th>Comments</th></tr></thead>
+      <tbody id="reports-tbody"><tr><td colspan="12" style="text-align:center;padding:20px;color:var(--dim)"><span class="spinner"></span></td></tr></tbody>
+    </table>
+  </div>
+  <div id="reports-pagination" style="display:flex;align-items:center;justify-content:space-between;padding:12px 4px 0;flex-wrap:wrap;gap:8px"></div>
+</div>
+
+<!-- ── SALES ── -->
+<div class="section-label"><span>Sales Team</span><div class="section-label-line"></div></div>
+
+<div class="three-col">
+  <!-- Renewal Alerts -->
+  <div class="card">
+    <div class="card-head">
+      <div class="card-title">Renewal Alerts</div>
+      <div class="card-badge badge-red">≤10 hours left</div>
+    </div>
+    <div class="scroll-body" id="renewal-list"><div style="text-align:center;padding:20px;color:var(--dim)"><span class="spinner"></span></div></div>
+  </div>
+
+  <!-- Inactive Students -->
+  <div class="card">
+    <div class="card-head">
+      <div class="card-title">Inactive Students</div>
+      <div class="card-badge badge-gold">No session 10+ days</div>
+    </div>
+    <div class="scroll-body" id="inactive-list"><div style="text-align:center;padding:20px;color:var(--dim)"><span class="spinner"></span></div></div>
+  </div>
+
+  <!-- Level Distribution -->
+  <div class="card">
+    <div class="card-head">
+      <div class="card-title">Level Distribution</div>
+      <div class="card-badge badge-blue">All Students</div>
+    </div>
+    <div id="level-chart"></div>
+  </div>
+</div>
+
+<!-- ── CHARTS ROW ── -->
+<div class="section-label"><span>Analytics</span><div class="section-label-line"></div></div>
+
+<div class="three-col">
+  <!-- Weekly sessions -->
+  <div class="card">
+    <div class="card-head">
+      <div class="card-title">Weekly Sessions</div>
+      <div class="card-badge badge-blue">Last 10 Weeks</div>
+    </div>
+    <div class="bar-chart" id="weekly-chart"></div>
+  </div>
+
+  <!-- Performance breakdown -->
+  <div class="card">
+    <div class="card-head">
+      <div class="card-title">Performance Breakdown</div>
+      <div class="card-badge badge-green">All Sessions</div>
+    </div>
+    <div id="perf-chart"></div>
+  </div>
+
+  <!-- Homework rate -->
+  <div class="card">
+    <div class="card-head">
+      <div class="card-title">Homework Completion</div>
+      <div class="card-badge badge-gold">All Sessions</div>
+    </div>
+    <div id="hw-chart"></div>
+  </div>
+</div>
+
+<!-- ── TEACHER HOURS SUMMARY ── -->
+<div class="section-label"><span>Teacher Hours Summary</span><div class="section-label-line"></div></div>
+
+<div class="card" style="margin-bottom:20px">
+  <div class="card-head">
+    <div class="card-title">Monthly Hours per Teacher</div>
+    <div style="display:flex;align-items:center;gap:10px">
+      <select id="payroll-month" class="search-input" style="width:160px;margin-bottom:0" onchange="renderPayroll()"></select>
+      <div class="card-badge badge-purple" id="payroll-total">Loading</div>
+    </div>
+  </div>
+  <div class="tbl-wrap">
+    <table class="tbl">
+      <thead>
+        <tr>
+          <th>Teacher</th>
+          <th>Sessions (Non-Absent)</th>
+          <th>Absent Reports</th>
+          <th>Total Reports</th>
+          <th>Est. Hours</th>
+          <th>Monthly Share</th>
+        </tr>
+      </thead>
+      <tbody id="payroll-tbody"><tr><td colspan="6" style="text-align:center;padding:20px;color:var(--dim)"><span class="spinner"></span></td></tr></tbody>
+    </table>
+  </div>
+</div>
+
+<!-- ── STUDENT LOOKUP ── -->
+<div class="section-label"><span>Student Lookup</span><div class="section-label-line"></div></div>
+<div class="card" style="margin-bottom:20px">
+  <div class="card-head">
+    <div class="card-title">Individual Student Profile</div>
+    <div class="card-badge badge-purple">Full History</div>
+  </div>
+  <input type="text" class="search-input" id="student-lookup" placeholder="🔍  Type student name..." oninput="lookupStudent()" style="margin-bottom:12px"/>
+  <div id="student-profile"><div style="text-align:center;padding:20px;color:var(--dim);font-size:12px">Start typing to search a student</div></div>
+</div>
+
+</main>
+
+<footer>
+  AMERICAN LIFE · PRIVATE CLASSES DASHBOARD · ACADEMIC YEAR 2025–2026 &nbsp;|&nbsp;
+  <span id="footer-updated">Loading...</span> &nbsp;|&nbsp;
+  Live from Google Sheets · Auto-refresh every 5 min
+</footer>
+
+<script>
+// ══════════════════════════════════════════════════════════
+//  CONFIG — Google Apps Script Web App URL
+// ══════════════════════════════════════════════════════════
+const SHEET_CSV_URL =
+  'https://script.google.com/macros/s/AKfycbxSOky9k8cRbVyvW2ZSXv2BCjL6zmuWjbMZb-Ul7128gBBY5KVUoEIbLJOYJJEllLuNaw/exec';
+
+// Global data store
+let G = { sessions: [], students: {}, allHoursRows: [], allReportRows: [] };
+
+// ── DATE DISPLAY ─────────────────────────────────────────
+const now = new Date();
+document.getElementById('navDate').textContent =
+  now.toLocaleDateString('en-GB',{weekday:'short',day:'2-digit',month:'short',year:'numeric'});
+
+// ── CSV PARSER ───────────────────────────────────────────
+function parseCSV(text) {
+  const lines = [];
+  let cur = '', inQ = false;
+  const cells = [];
+  const allRows = [];
+  for (let i = 0; i < text.length; i++) {
+    const c = text[i];
+    if (c === '"') { inQ = !inQ; }
+    else if (c === ',' && !inQ) { cells.push(cur.trim()); cur = ''; }
+    else if ((c === '\n' || c === '\r') && !inQ) {
+      if (cur.trim() || cells.length) { cells.push(cur.trim()); allRows.push([...cells]); cells.length = 0; cur = ''; }
+    } else { cur += c; }
+  }
+  if (cur.trim() || cells.length) { cells.push(cur.trim()); allRows.push([...cells]); }
+  return allRows.filter(r => r.some(c => c));
+}
+
+// ── DATE PARSER — handles Date objects, Excel serials, strings ───
+function excelDateToJS(val) {
+  if (!val) return null;
+  if (val instanceof Date) return isNaN(val.getTime()) ? null : val;
+  if (typeof val === 'string' && val.includes('/')) return new Date(val);
+  if (typeof val === 'string' && val.includes('-')) return new Date(val);
+  const n = parseFloat(val);
+  if (!n || n < 1000) return null;
+  return new Date(Math.round((n - 25569) * 86400 * 1000));
+}
+
+function formatDate(d) {
+  if (!d) return '—';
+  return d.toLocaleDateString('en-GB',{day:'2-digit',month:'short',year:'numeric'});
+}
+
+function daysSince(d) {
+  if (!d) return 9999;
+  return Math.floor((Date.now() - d.getTime()) / 86400000);
+}
+
+// ── PARSE SHEET ROW ──────────────────────────────────────
+function parseRow(r) {
+  // Cols: 0=Timestamp 1=Teacher 2=Student 3=Date 4=ClassTime 5=Level
+  //       6=RegHours 7=Classroom 8=LessonNum 9=Performance 10=Participation
+  //       11=LessonSummary 12=SkillsPracticed 13=PlanNextSession
+  //       14=Homework 15=Comments
+  const teacherRaw = r[1] || '';
+  const studentRaw = r[2] || '';
+  const teacherParts = teacherRaw.split(' - ');
+  const studentParts = studentRaw.split(' - ');
+
+  const dateVal = r[3];
+  const date = excelDateToJS(dateVal) || excelDateToJS(r[0]);
+
+  return {
+    timestamp: r[0],
+    teacherCode: teacherParts[0]?.trim() || '',
+    teacher: teacherParts[1]?.trim() || teacherRaw.trim(),
+    studentCode: studentParts[0]?.trim() || '',
+    student: studentParts[1]?.trim() || studentRaw.trim(),
+    date,
+    level: r[5] || '',
+    regHours: parseFloat(r[6]) || 0,
+    classroom: r[7] || '',
+    lessonNum: parseFloat(r[8]) || 1,
+    performance: r[9] || '',
+    participation: r[10] || '',
+    summary: r[11] || '',
+    skills: r[12] || '',
+    nextPlan: r[13] || '',
+    homework: r[14] || '',
+    comments: r[15] || ''
+  };
+}
+
+// ── LOAD DATA ─────────────────────────────────────────────
+async function loadDashboard() {
+  setBadge('loading');
+  try {
+    const resp = await fetch(SHEET_CSV_URL);
+    if (!resp.ok) throw new Error('HTTP ' + resp.status);
+    const json = await resp.json();
+
+    // Support both old (array) and new (object with two sheets) format
+    let rows, studentReportRows = [];
+    if (Array.isArray(json)) {
+      rows = json;
+    } else {
+      rows = json.formResponses || [];
+      studentReportRows = json.studentReport || [];
+    }
+
+    if (!rows.length || rows.length < 2) throw new Error('No data rows found');
+
+    const sessions = rows.slice(1)
+      .map(parseRow)
+      .filter(s => s.studentCode && s.teacherCode);
+
+    // Parse Student Report sheet
+    // Cols: 0=Name 1=Level 2=FirstSessionDate 3=RegHours 4=UsedHours
+    //       5=RemainingHours 6=WarningRenew 7=FirstTeacher 8=LastTeacher
+    //       9=FirstSessionDate 10=LastSessionDate 11=LatestFeedback
+    //       12=WeeklyLessonSum 13=MonthlyLessonSum 14=DaysSinceLast
+    //       15=InactiveWarning 16=CommentsOrSuggestions
+    const studentReport = studentReportRows.slice(1)
+      .filter(r => r[0])
+      .map(r => ({
+        name:            String(r[0]||'').trim(),
+        level:           String(r[1]||'').trim(),
+        firstDate:       r[2] ? String(r[2]).trim() : '',
+        regHours:        parseFloat(r[3]) || 0,
+        usedHours:       parseFloat(r[4]) || 0,
+        remainingHours:  parseFloat(r[5]) || 0,
+        warningRenew:    String(r[6]||'').trim(),
+        firstTeacher:    String(r[7]||'').split(' - ')[1]?.trim() || String(r[7]||'').trim(),
+        lastTeacher:     String(r[8]||'').split(' - ')[1]?.trim() || String(r[8]||'').trim(),
+        lastDate:        r[10] ? String(r[10]).trim() : '',
+        latestFeedback:  String(r[11]||'').trim(),
+        weeklyLessons:   parseFloat(r[12]) || 0,
+        monthlyLessons:  parseFloat(r[13]) || 0,
+        daysSinceLast:   parseFloat(r[14]) || 0,
+        inactiveWarning: String(r[15]||'').trim(),
+        comments:        String(r[16]||'').trim()
+      }));
+
+    // Parse Payroll sheets
+    const payrollData = {};
+    if (json.payroll) {
+      Object.entries(json.payroll).forEach(([sheetName, rows]) => {
+        const match = sheetName.match(/Payroll Summary - (.+)/);
+        if (!match) return;
+        const monthKey = match[1];
+        const teachers = [];
+        rows.slice(1).forEach(r => {
+          if (!r[0]) return;
+          let name = String(r[0]);
+          // Extract cached value from IFERROR formula
+          const nm = name.match(/\),"([^"]+)"\)$/);
+          if (nm) name = nm[1];
+          else if (name.includes('DUMMYFUNCTION')) return;
+          let lessons = r[3];
+          if (typeof lessons === 'string') {
+            const lm = lessons.match(/\),([\d.]+)\)$/);
+            if (lm) lessons = parseFloat(lm[1]); else lessons = 0;
+          }
+          lessons = parseFloat(lessons) || 0;
+          if (!name.trim() || name.trim() === '') return;
+          const parts = name.split(' - ');
+          const cleanName = parts.length >= 2 ? parts[1].trim() : name.trim();
+          teachers.push({ raw: name, name: cleanName, lessons });
+        });
+        payrollData[monthKey] = teachers;
+      });
+    }
+
+    G.sessions = sessions;
+    G.studentReport = studentReport;
+    G.payrollData = payrollData;
+    processData(sessions);
+    if (Object.keys(payrollData).length > 0) buildPayrollFromSheets(payrollData);
+    setBadge('live');
+    hideError();
+    document.getElementById('footer-updated').textContent =
+      'Last updated: ' + new Date().toLocaleTimeString('en-GB');
+  } catch(err) {
+    setBadge('error');
+    showError('Could not load Google Sheets data: ' + err.message);
+    console.error(err);
+  }
+}
+
+function setBadge(state) {
+  const b = document.getElementById('liveBadge');
+  if (state === 'live') { b.textContent = '● LIVE'; b.style.cssText = ''; }
+  else if (state === 'loading') { b.textContent = '◌ LOADING'; b.style.color = '#FBBF24'; b.style.borderColor = 'rgba(251,191,36,0.3)'; b.style.background = 'rgba(251,191,36,0.1)'; }
+  else { b.textContent = '✕ ERROR'; b.style.color = '#F87171'; b.style.borderColor = 'rgba(248,113,113,0.3)'; b.style.background = 'rgba(248,113,113,0.1)'; }
+}
+
+function showError(msg) {
+  const el = document.getElementById('errorBanner');
+  el.style.display = 'block';
+  el.textContent = '⚠️ ' + msg;
+}
+function hideError() { document.getElementById('errorBanner').style.display = 'none'; }
+
+// ── PROCESS DATA ─────────────────────────────────────────
+function processData(sessions) {
+  const today = new Date();
+
+  // Build student map
+  const smap = {};
+  sessions.forEach(s => {
+    if (!s.studentCode) return;
+    if (!smap[s.studentCode]) smap[s.studentCode] = {
+      code: s.studentCode, name: s.student,
+      teacher: '', teacherCode: '',
+      level: '', regHours: 0, sessions: [], lastDate: null
+    };
+    const st = smap[s.studentCode];
+    if (s.regHours > 0) st.regHours = s.regHours;
+    if (s.level) st.level = s.level;
+    if (s.teacher) { st.teacher = s.teacher; st.teacherCode = s.teacherCode; }
+    st.sessions.push(s);
+    if (s.date && (!st.lastDate || s.date > st.lastDate)) st.lastDate = s.date;
+  });
+  G.students = smap;
+  const students = Object.values(smap);
+
+  // KPIs
+  const totalReg = students.reduce((a,s) => a + s.regHours, 0);
+  const notAbsent = sessions.filter(s => s.performance !== 'Absent');
+
+  // Build studentReport lookup for accurate used/remaining hours
+  const srMapRisk = {};
+  (G.studentReport || []).forEach(sr => {
+    const code = sr.name.split(' - ')[0]?.trim();
+    if (code) srMapRisk[code] = sr;
+  });
+
+  const riskList = students
+    .filter(s => s.regHours > 0)
+    .map(s => {
+      const sr = srMapRisk[s.code];
+      if (!sr) return null;
+      const used = sr.usedHours || 0;
+      const rem  = sr.remainingHours || 0;
+      const days = daysSince(s.lastDate);
+      return { ...s, used, remaining: rem, lastDays: days,
+        status: rem <= 3 ? 'danger' : rem <= 10 ? 'warn' : 'ok' };
+    })
+    .filter(s => s && s.status !== 'ok')
+    .sort((a,b) => a.remaining - b.remaining);
+
+  document.getElementById('kpi-students').textContent = students.length;
+  document.getElementById('kpi-students-sub').textContent = `${students.length} unique students`;
+  document.getElementById('kpi-hours').textContent = totalReg.toLocaleString();
+  document.getElementById('kpi-hours-sub').textContent = `${notAbsent.length} sessions taught`;
+  document.getElementById('kpi-sessions').textContent = sessions.length;
+  document.getElementById('kpi-sessions-sub').textContent = `${notAbsent.length} attended · ${sessions.length - notAbsent.length} absent`;
+  document.getElementById('kpi-risk').textContent = riskList.length;
+  document.getElementById('kpi-risk-sub').textContent = riskList.filter(s=>s.status==='danger').length + ' critical';
+  const teacherSet = [...new Set(sessions.map(s=>s.teacherCode).filter(Boolean))];
+  document.getElementById('kpi-teachers').textContent = teacherSet.length;
+  document.getElementById('kpi-teachers-sub').textContent = `${sessions.length} reports submitted`;
+
+  // Render all sections
+  renderRiskTable(riskList);
+  renderTeachers(sessions);
+  renderHoursTable(students);
+  renderReportsTable(sessions);
+  renderRenewal(riskList);
+  renderInactive(students);
+  renderLevelChart(students);
+  renderWeeklyChart(sessions);
+  renderPerfChart(sessions);
+  renderHWChart(sessions);
+  buildPayrollMonths(sessions);
+}
+
+// ── RISK TABLE ───────────────────────────────────────────
+function renderRiskTable(riskList) {
+  document.getElementById('risk-badge').textContent = riskList.length + ' alerts';
+  const tb = document.getElementById('risk-tbody');
+  if (!riskList.length) {
+    tb.innerHTML = '<tr><td colspan="5" style="text-align:center;padding:20px;color:var(--dim)">✅ No students at risk</td></tr>'; return;
+  }
+  tb.innerHTML = riskList.map(s => `<tr>
+    <td><div class="name">${s.name}</div><div class="code">${s.code}</div></td>
+    <td style="font-size:12px;color:var(--muted)">${s.teacher}</td>
+    <td class="mono">${s.remaining}h</td>
+    <td class="mono">${s.lastDays === 9999 ? '—' : s.lastDays + 'd ago'}</td>
+    <td><span class="status ${s.status==='danger'?'s-danger':'s-warn'}">${s.status==='danger'?'Critical':'Warning'}</span></td>
+  </tr>`).join('');
+}
+
+// ── TEACHERS ─────────────────────────────────────────────
+function renderTeachers(sessions) {
+  const tmap = {};
+  sessions.forEach(s => {
+    if (!s.teacher) return;
+    if (!tmap[s.teacher]) tmap[s.teacher] = { name: s.teacher, sessions: 0, students: new Set(), absent: 0 };
+    if (s.performance === 'Absent') tmap[s.teacher].absent++;
+    else { tmap[s.teacher].sessions++; tmap[s.teacher].students.add(s.studentCode); }
+  });
+  const list = Object.values(tmap).sort((a,b) => b.sessions - a.sessions);
+  const max = Math.max(...list.map(t=>t.sessions), 1);
+  const el = document.getElementById('teacher-list');
+  el.innerHTML = list.map(t => {
+    const pct = Math.round(t.sessions / max * 100);
+    const cls = pct>80?'pbar-ok':pct>40?'pbar-warn':'pbar-danger';
+    const init = t.name.replace('Mr. ','').replace('Ms. ','')[0] || '?';
+    return `<div class="teacher-row">
+      <div class="teacher-avatar">${init}</div>
+      <div class="teacher-info">
+        <div class="teacher-name">${t.name} <span style="color:var(--dim);font-weight:400;font-size:10px">${t.students.size} students</span></div>
+        <div class="pbar-wrap" style="margin-top:4px">
+          <div class="pbar"><div class="pbar-fill ${cls}" style="width:${pct}%"></div></div>
+          <div class="pbar-val">${t.sessions} cls</div>
+        </div>
+      </div>
+      <div class="teacher-hrs">${t.sessions*2}h</div>
+    </div>`;
+  }).join('');
+}
+
+// ── HOURS TABLE (with search) ─────────────────────────────
+let allHoursRows = [];
+function renderHoursTable(students) {
+  allHoursRows = (G.studentReport || [])
+    .filter(sr => sr.regHours > 0)
+    .map(sr => {
+      const code = sr.name.split(' - ')[0]?.trim();
+      const st   = students.find(s => s.code === code) || {};
+      return {
+        name:      sr.name.split(' - ').slice(1, -1).join(' - ').trim() || sr.name,
+        code:      code,
+        level:     sr.level     || st.level    || '',
+        teacher:   sr.lastTeacher || st.teacher || '',
+        reg:       sr.regHours,
+        used:      sr.usedHours      || 0,
+        remaining: sr.remainingHours || 0
+      };
+    })
+    .sort((a,b) => b.reg - a.reg);
+  G.allHoursRows = allHoursRows;
+  renderHoursRows(allHoursRows);
+}
+function renderHoursRows(rows) {
+  const tb = document.getElementById('hours-tbody');
+  if (!rows.length) { tb.innerHTML = '<tr><td colspan="7" style="text-align:center;padding:16px;color:var(--dim)">No data</td></tr>'; return; }
+  tb.innerHTML = rows.map(s => {
+    const pct = s.reg > 0 ? Math.min(100, Math.round(s.used / s.reg * 100)) : 0;
+    const cls = pct>85?'pbar-danger':pct>65?'pbar-warn':'pbar-ok';
+    const scls = pct>85?'s-danger':pct>65?'s-warn':'s-ok';
+    return `<tr>
+      <td><div class="name">${s.name}</div><div class="code">${s.code}</div></td>
+      <td style="font-size:11px;color:var(--muted)">${s.level}</td>
+      <td style="font-size:11px;color:var(--muted)">${s.teacher}</td>
+      <td class="mono">${s.reg}h</td>
+      <td class="mono">${s.used}h</td>
+      <td><span class="status ${scls}">${s.remaining}h</span></td>
+      <td style="min-width:110px"><div class="pbar-wrap"><div class="pbar"><div class="pbar-fill ${cls}" style="width:${pct}%"></div></div><div class="pbar-val">${pct}%</div></div></td>
+    </tr>`;
+  }).join('');
+}
+function filterHoursTable() {
+  const q = document.getElementById('hours-search').value.toLowerCase().trim();
+  if (!G.allHoursRows || !G.allHoursRows.length) return;
+  const filtered = !q ? G.allHoursRows : G.allHoursRows.filter(s =>
+    (s.name||'').toLowerCase().includes(q) ||
+    (s.teacher||'').toLowerCase().includes(q) ||
+    (s.level||'').toLowerCase().includes(q) ||
+    (s.code||'').toLowerCase().includes(q)
+  );
+  renderHoursRows(filtered);
+}
+
+// ── ALL REPORTS TABLE ─────────────────────────────────────
+let allReportRows = [];
+function renderReportsTable(sessions) {
+  allReportRows = [...sessions].sort((a,b) => (b.date||0) - (a.date||0));
+  G.allReportRows = allReportRows;
+  document.getElementById('reports-badge').textContent = sessions.length + ' records';
+  renderReportRows(allReportRows);
+}
+function perfPill(p) {
+  if (!p) return '—';
+  const cls = p==='Excellent'?'perf-excellent':p==='Satisfactory'?'perf-satisfactory':p==='Absent'?'perf-absent':'perf-unsatisfactory';
+  return `<span class="perf-pill ${cls}">${p}</span>`;
+}
+function hwPill(h) {
+  if (!h) return '—';
+  if (h==='Done') return `<span class="status s-ok">Done</span>`;
+  if (h==='Undone') return `<span class="status s-danger">Undone</span>`;
+  return h;
+}
+const REPORTS_PAGE_SIZE = 100;
+let reportsCurrentPage = 1;
+let reportsFilteredRows = [];
+
+function renderReportRows(rows) {
+  reportsFilteredRows = rows;
+  reportsCurrentPage = 1;
+  renderReportPage();
+}
+
+function renderReportPage() {
+  const tb = document.getElementById('reports-tbody');
+  const total = reportsFilteredRows.length;
+  if (!total) {
+    tb.innerHTML = '<tr><td colspan="12" style="text-align:center;padding:16px;color:var(--dim)">No records match filter</td></tr>';
+    document.getElementById('reports-pagination').innerHTML = '';
+    return;
+  }
+  const totalPages = Math.ceil(total / REPORTS_PAGE_SIZE);
+  reportsCurrentPage = Math.max(1, Math.min(reportsCurrentPage, totalPages));
+  const start = (reportsCurrentPage - 1) * REPORTS_PAGE_SIZE;
+  const pageRows = reportsFilteredRows.slice(start, start + REPORTS_PAGE_SIZE);
+
+  tb.innerHTML = pageRows.map(s => `<tr>
+    <td class="mono" style="white-space:nowrap">${formatDate(s.date)}</td>
+    <td><div class="name" style="white-space:nowrap">${s.student}</div><div class="code">${s.studentCode}</div></td>
+    <td style="font-size:11px;color:var(--muted);white-space:nowrap">${s.teacher}</td>
+    <td style="font-size:11px;color:var(--muted)">${s.level}</td>
+    <td style="font-size:11px;color:var(--dim)">${s.classroom}</td>
+    <td class="mono" style="text-align:center">${s.lessonNum}</td>
+    <td>${perfPill(s.performance)}</td>
+    <td style="font-size:11px;color:var(--muted)">${s.participation||'—'}</td>
+    <td>${hwPill(s.homework)}</td>
+    <td style="font-size:11px;color:var(--muted);max-width:180px;word-break:break-word">${s.summary||'—'}</td>
+    <td style="font-size:11px;color:var(--muted);max-width:160px;word-break:break-word">${s.nextPlan||'—'}</td>
+    <td style="font-size:11px;color:var(--muted);max-width:180px;word-break:break-word">${s.comments||'—'}</td>
+  </tr>`).join('');
+
+  // Scroll table back to top on page change
+  const wrap = tb.closest('.tbl-wrap');
+  if (wrap) wrap.scrollTop = 0;
+
+  // Render pagination controls
+  const pg = document.getElementById('reports-pagination');
+  const btnStyle = `style="padding:5px 12px;border-radius:6px;border:1px solid var(--border);background:var(--card);color:var(--text);cursor:pointer;font-size:12px;font-family:'Geist Mono',monospace"`;
+  const activeBtnStyle = `style="padding:5px 12px;border-radius:6px;border:1px solid var(--blue);background:var(--blue);color:#fff;cursor:pointer;font-size:12px;font-family:'Geist Mono',monospace"`;
+
+  // Build page buttons (show max 7 pages around current)
+  let pageButtons = '';
+  const delta = 3;
+  const left = Math.max(1, reportsCurrentPage - delta);
+  const right = Math.min(totalPages, reportsCurrentPage + delta);
+  if (left > 1) pageButtons += `<button ${btnStyle} onclick="goReportPage(1)">1</button>`;
+  if (left > 2) pageButtons += `<span style="color:var(--dim);padding:0 4px">…</span>`;
+  for (let i = left; i <= right; i++) {
+    pageButtons += `<button ${i === reportsCurrentPage ? activeBtnStyle : btnStyle} onclick="goReportPage(${i})">${i}</button>`;
+  }
+  if (right < totalPages - 1) pageButtons += `<span style="color:var(--dim);padding:0 4px">…</span>`;
+  if (right < totalPages) pageButtons += `<button ${btnStyle} onclick="goReportPage(${totalPages})">${totalPages}</button>`;
+
+  pg.innerHTML = `
+    <div style="font-size:11px;color:var(--muted);font-family:'Geist Mono',monospace">
+      Showing ${start+1}–${Math.min(start+REPORTS_PAGE_SIZE, total)} of <strong style="color:var(--text)">${total}</strong> records
+    </div>
+    <div style="display:flex;gap:6px;align-items:center;flex-wrap:wrap">
+      <button ${btnStyle} onclick="goReportPage(${reportsCurrentPage-1})" ${reportsCurrentPage===1?'disabled style="opacity:.4;cursor:default"':''}>← Prev</button>
+      ${pageButtons}
+      <button ${btnStyle} onclick="goReportPage(${reportsCurrentPage+1})" ${reportsCurrentPage===totalPages?'disabled style="opacity:.4;cursor:default"':''}>Next →</button>
+    </div>`;
+}
+
+function goReportPage(p) {
+  reportsCurrentPage = p;
+  renderReportPage();
+}
+
+function filterReports() {
+  const q = document.getElementById('report-search').value.toLowerCase().trim();
+  const perf = document.getElementById('report-filter-perf').value;
+  const hw = document.getElementById('report-filter-hw').value;
+  if (!G.allReportRows || !G.allReportRows.length) return;
+  const filtered = G.allReportRows.filter(s => {
+    const matchQ = !q || [s.student, s.teacher, s.level, s.summary, s.comments, s.skills, s.nextPlan, s.studentCode]
+      .some(f => f && String(f).toLowerCase().includes(q));
+    const matchP = !perf || s.performance === perf;
+    const matchH = !hw || s.homework === hw;
+    return matchQ && matchP && matchH;
+  });
+  renderReportRows(filtered);
+  const badge = document.getElementById('reports-badge');
+  if (badge) badge.textContent = filtered.length + ' records' + (filtered.length < G.allReportRows.length ? ' (filtered)' : '');
+}
+
+// ── RENEWAL LIST ─────────────────────────────────────────
+function renderRenewal(riskList) {
+  const el = document.getElementById('renewal-list');
+  const urgent = riskList.slice(0, 10);
+  if (!urgent.length) { el.innerHTML = '<div style="text-align:center;padding:20px;color:var(--dim);font-size:12px">✅ No urgent renewals</div>'; return; }
+  el.innerHTML = urgent.map(s => `<div class="alert-item">
+    <div class="alert-icon ${s.status==='danger'?'red':'gold'}">${s.status==='danger'?'🔴':'🟡'}</div>
+    <div class="alert-content">
+      <div class="alert-name">${s.name}</div>
+      <div class="alert-desc"><strong style="color:${s.status==='danger'?'#F87171':'#FBBF24'}">${s.remaining}h</strong> remaining · ${s.lastDays === 9999 ? 'No session recorded' : 'Last session ' + s.lastDays + 'd ago'}</div>
+    </div>
+  </div>`).join('');
+}
+
+// ── INACTIVE ─────────────────────────────────────────────
+function renderInactive(students) {
+  const el = document.getElementById('inactive-list');
+  const inactive = students
+    .filter(s => s.lastDate && daysSince(s.lastDate) >= 10)
+    .sort((a,b) => daysSince(b.lastDate) - daysSince(a.lastDate))
+    .slice(0, 10);
+  if (!inactive.length) { el.innerHTML = '<div style="text-align:center;padding:20px;color:var(--dim);font-size:12px">✅ All students active</div>'; return; }
+  el.innerHTML = inactive.map(s => `<div class="alert-item">
+    <div class="alert-icon gold">⚡</div>
+    <div class="alert-content">
+      <div class="alert-name">${s.name}</div>
+      <div class="alert-desc">No session for <strong style="color:#FBBF24">${daysSince(s.lastDate)} days</strong> · ${s.teacher}</div>
+    </div>
+  </div>`).join('');
+}
+
+// ── LEVEL CHART ──────────────────────────────────────────
+function renderLevelChart(students) {
+  const counts = {};
+  const colors = { 'Adult (A1–C2)':'#2563EB','Teenglish':'#7C3AED','IELTS/TOEFL':'#C41E2E','German':'#C9993A','Other':'#16A34A' };
+  students.forEach(s => {
+    const l = s.level.toLowerCase();
+    const cat = l.includes('ielts')||l.includes('toefl')||l.includes('yds') ? 'IELTS/TOEFL'
+      : l.includes('german') ? 'German'
+      : l.includes('teen') ? 'Teenglish'
+      : l.match(/[abc]\d/) ? 'Adult (A1–C2)' : 'Other';
+    counts[cat] = (counts[cat]||0)+1;
+  });
+  const total = Object.values(counts).reduce((a,b)=>a+b,0)||1;
+  const el = document.getElementById('level-chart');
+  el.innerHTML = Object.entries(counts).sort((a,b)=>b[1]-a[1]).map(([label,count]) => {
+    const pct = Math.round(count/total*100);
+    return `<div style="margin-bottom:12px">
+      <div style="display:flex;justify-content:space-between;margin-bottom:4px">
+        <span style="font-size:12px;color:var(--text)">${label}</span>
+        <span style="font-size:10px;font-family:'Geist Mono',monospace;color:var(--muted)">${count} · ${pct}%</span>
+      </div>
+      <div class="pbar"><div class="pbar-fill" style="width:${pct}%;background:${colors[label]||'#4A5A7A'}"></div></div>
+    </div>`;
+  }).join('');
+}
+
+// ── WEEKLY CHART ─────────────────────────────────────────
+function renderWeeklyChart(sessions) {
+  const today = new Date();
+  const weeks = Array.from({length:10},(_,i) => {
+    const end = new Date(today);
+    end.setDate(today.getDate() - i*7);
+    const start = new Date(end);
+    start.setDate(end.getDate() - 6);
+    return { start, end, label: 'W-'+i };
+  }).reverse();
+  const counts = weeks.map(w =>
+    sessions.filter(s => s.date && s.date >= w.start && s.date <= w.end && s.performance !== 'Absent').length
+  );
+  const labels = weeks.map((_,i) => i===9?'This':'W-'+(9-i));
+  const max = Math.max(...counts, 1);
+  document.getElementById('weekly-chart').innerHTML = counts.map((c,i) => {
+    const h = Math.max(4, Math.round(c/max*95));
+    const isLast = i===counts.length-1;
+    return `<div class="bar-col">
+      <div class="bar-fill" style="height:${h}px;${isLast?'background:linear-gradient(180deg,#C9993A,#92600A)':''}">
+        <span class="bar-val">${c}</span>
+      </div>
+      <div class="bar-lbl">${labels[i]}</div>
+    </div>`;
+  }).join('');
+}
+
+// ── PERFORMANCE CHART ─────────────────────────────────────
+function renderPerfChart(sessions) {
+  const order = ['Excellent','Satisfactory','Unsatisfactory','Absent'];
+  const colors = { Excellent:'#4ADE80', Satisfactory:'#60A5FA', Unsatisfactory:'#F87171', Absent:'#94A3B8' };
+  const counts = {};
+  sessions.forEach(s => { if (s.performance) counts[s.performance] = (counts[s.performance]||0)+1; });
+  const total = sessions.length || 1;
+  const el = document.getElementById('perf-chart');
+  el.innerHTML = order.filter(k => counts[k]).map(k => {
+    const pct = Math.round(counts[k]/total*100);
+    return `<div style="margin-bottom:12px">
+      <div style="display:flex;justify-content:space-between;margin-bottom:4px">
+        <span class="perf-pill ${k==='Excellent'?'perf-excellent':k==='Satisfactory'?'perf-satisfactory':k==='Absent'?'perf-absent':'perf-unsatisfactory'}">${k}</span>
+        <span style="font-size:10px;font-family:'Geist Mono',monospace;color:var(--muted)">${counts[k]} · ${pct}%</span>
+      </div>
+      <div class="pbar"><div class="pbar-fill" style="width:${pct}%;background:${colors[k]}"></div></div>
+    </div>`;
+  }).join('');
+}
+
+// ── HOMEWORK CHART ────────────────────────────────────────
+function renderHWChart(sessions) {
+  const done = sessions.filter(s=>s.homework==='Done').length;
+  const undone = sessions.filter(s=>s.homework==='Undone').length;
+  const total = done + undone || 1;
+  const pct = Math.round(done/total*100);
+  const el = document.getElementById('hw-chart');
+  el.innerHTML = `
+    <div style="text-align:center;margin-bottom:16px">
+      <div style="font-family:'Instrument Serif',serif;font-size:52px;color:var(--white)">${pct}%</div>
+      <div style="font-size:11px;color:var(--muted);margin-top:4px">Homework Completion Rate</div>
+    </div>
+    <div class="pbar" style="height:8px;margin-bottom:16px"><div class="pbar-fill pbar-ok" style="width:${pct}%"></div></div>
+    <div style="display:flex;justify-content:space-between">
+      <div style="text-align:center">
+        <div style="font-size:20px;font-weight:700;color:#4ADE80">${done}</div>
+        <div style="font-size:10px;color:var(--muted)">Done</div>
+      </div>
+      <div style="text-align:center">
+        <div style="font-size:20px;font-weight:700;color:#F87171">${undone}</div>
+        <div style="font-size:10px;color:var(--muted)">Undone</div>
+      </div>
+      <div style="text-align:center">
+        <div style="font-size:20px;font-weight:700;color:var(--muted)">${sessions.length - done - undone}</div>
+        <div style="font-size:10px;color:var(--dim)">N/A</div>
+      </div>
+    </div>`;
+}
+
+// ── STUDENT LOOKUP ────────────────────────────────────────
+// Per-student expand state — lives outside lookupStudent so rebuilds don't reset it
+const expandedStudents = {};
+
+function toggleStudentDetails(code) {
+  expandedStudents[code] = !expandedStudents[code];
+  const detailEl = document.getElementById('sd-' + code);
+  const arrowEl  = document.getElementById('sa-' + code);
+  if (!detailEl) return;
+
+  if (expandedStudents[code]) {
+    // Lazy render: only build HTML on first expand
+    if (!detailEl.dataset.rendered) {
+      const srMap3 = {};
+      (G.studentReport || []).forEach(sr => {
+        const c = sr.name.split(' - ')[0]?.trim();
+        if (c) srMap3[c] = sr;
+      });
+      detailEl.innerHTML = buildStudentDetail(srMap3[code] || null);
+      detailEl.dataset.rendered = '1';
+    }
+    detailEl.style.display = 'block';
+    if (arrowEl) arrowEl.textContent = '▲ Hide details';
+  } else {
+    detailEl.style.display = 'none';
+    if (arrowEl) arrowEl.textContent = '▼ Student details';
+  }
+}
+
+function buildStudentDetail(sr) {
+  // Lazy: only called on expand
+  if (!sr) return '<div style="color:var(--dim);font-size:11px;padding:8px 0">No additional data in Student Report</div>';
+  const rows = [
+    ['First Teacher',    sr.firstTeacher  || '—'],
+    ['Last Teacher',     sr.lastTeacher   || '—'],
+    ['First Session',    sr.firstDate     || '—'],
+    ['Last Session',     sr.lastDate      || '—'],
+    ['Weekly Lessons',   sr.weeklyLessons  > 0 ? sr.weeklyLessons  : '—'],
+    ['Monthly Lessons',  sr.monthlyLessons > 0 ? sr.monthlyLessons : '—'],
+    ['Latest Feedback',  sr.latestFeedback || '—'],
+    ['Comments',         sr.comments       || '—'],
+  ];
+  return `<div style="display:grid;grid-template-columns:auto 1fr;gap:6px 16px;align-items:start">
+    ${rows.map(([label, val]) => `
+      <div style="font-size:10px;color:var(--dim);letter-spacing:.06em;text-transform:uppercase;padding-top:2px;white-space:nowrap">${label}</div>
+      <div style="font-size:12px;color:var(--text);word-break:break-word">${val}</div>
+    `).join('')}
+  </div>`;
+}
+
+function lookupStudent() {
+  const q = document.getElementById('student-lookup').value.toLowerCase().trim();
+  const el = document.getElementById('student-profile');
+  if (!q || q.length < 2) {
+    el.innerHTML = '<div style="text-align:center;padding:20px;color:var(--dim);font-size:12px">Start typing to search a student</div>';
+    return;
+  }
+  const matches = Object.values(G.students).filter(s =>
+    s.name.toLowerCase().includes(q) || s.code.toLowerCase().includes(q)
+  );
+  if (!matches.length) {
+    el.innerHTML = '<div style="text-align:center;padding:20px;color:var(--dim);font-size:12px">No student found</div>';
+    return;
+  }
+
+  // Build studentReport lookup once per call
+  const srMap2 = {};
+  (G.studentReport || []).forEach(sr => {
+    const code = sr.name.split(' - ')[0]?.trim();
+    if (code) srMap2[code] = sr;
+  });
+
+  el.innerHTML = matches.slice(0,3).map(s => {
+    const sessions = s.sessions.sort((a,b) => (b.date||0)-(a.date||0));
+    const sr = srMap2[s.code];
+    const reg  = sr ? sr.regHours          : 0;
+    const used = sr ? (sr.usedHours  || 0) : 0;
+    const rem  = sr ? (sr.remainingHours || 0) : 0;
+    const pct  = reg > 0 ? Math.min(100, Math.round(used/reg*100)) : 0;
+    const cls  = pct>85?'pbar-danger':pct>65?'pbar-warn':'pbar-ok';
+    const lastSession = sessions[0];
+
+    // Restore expand state — if previously expanded, render detail immediately (lazy but consistent)
+    const isExpanded = !!expandedStudents[s.code];
+    const detailHTML = isExpanded ? buildStudentDetail(sr) : '';
+
+    return `<div style="background:rgba(255,255,255,0.03);border:1px solid var(--border);border-radius:12px;padding:18px;margin-bottom:12px">
+
+      <!-- Header row -->
+      <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:14px">
+        <div>
+          <div style="font-size:16px;font-weight:700;color:var(--white)">${s.name}</div>
+          <div style="font-size:11px;color:var(--dim);font-family:'Geist Mono',monospace">${s.code} · ${s.level} · ${s.teacher}</div>
+        </div>
+        <div style="text-align:right">
+          <div style="font-size:11px;color:var(--muted)">Last session</div>
+          <div style="font-size:12px;font-family:'Geist Mono',monospace;color:var(--text)">${formatDate(s.lastDate)}</div>
+        </div>
+      </div>
+
+      <!-- KPI boxes -->
+      <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:14px">
+        <div style="text-align:center;background:rgba(255,255,255,0.03);border-radius:8px;padding:10px">
+          <div style="font-size:22px;font-weight:700;color:var(--white)">${reg||'—'}</div>
+          <div style="font-size:10px;color:var(--muted)">Registered</div>
+        </div>
+        <div style="text-align:center;background:rgba(255,255,255,0.03);border-radius:8px;padding:10px">
+          <div style="font-size:22px;font-weight:700;color:var(--white)">${used}</div>
+          <div style="font-size:10px;color:var(--muted)">Used</div>
+        </div>
+        <div style="text-align:center;background:rgba(255,255,255,0.03);border-radius:8px;padding:10px">
+          <div style="font-size:22px;font-weight:700;color:${rem<=5?'#F87171':rem<=15?'#FBBF24':'#4ADE80'}">${rem}</div>
+          <div style="font-size:10px;color:var(--muted)">Remaining</div>
+        </div>
+        <div style="text-align:center;background:rgba(255,255,255,0.03);border-radius:8px;padding:10px">
+          <div style="font-size:22px;font-weight:700;color:var(--white)">${sessions.length}</div>
+          <div style="font-size:10px;color:var(--muted)">Reports</div>
+        </div>
+      </div>
+
+      <!-- Progress bar -->
+      ${reg>0?`<div class="pbar-wrap" style="margin-bottom:14px"><div class="pbar" style="height:8px"><div class="pbar-fill ${cls}" style="width:${pct}%"></div></div><div class="pbar-val">${pct}%</div></div>`:''}
+
+      <!-- Latest report -->
+      ${lastSession ? `<div style="background:rgba(255,255,255,0.03);border-radius:8px;padding:12px;margin-bottom:10px">
+        <div style="font-size:10px;color:var(--dim);margin-bottom:6px;letter-spacing:.08em;text-transform:uppercase">Latest Report · ${formatDate(lastSession.date)}</div>
+        <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:6px">
+          ${perfPill(lastSession.performance)}
+          <span style="font-size:11px;color:var(--muted)">${lastSession.participation||''}</span>
+          ${hwPill(lastSession.homework)}
+        </div>
+        <div style="font-size:11px;color:var(--muted);margin-bottom:4px">${lastSession.summary||'—'}</div>
+        ${lastSession.comments&&lastSession.comments!=='-'&&lastSession.comments!=='None'?`<div style="font-size:11px;color:var(--dim);border-left:2px solid var(--border);padding-left:8px;margin-top:6px">${lastSession.comments}</div>`:''}
+      </div>` : ''}
+
+      <!-- Expand toggle button -->
+      <button id="sa-${s.code}"
+        onclick="toggleStudentDetails('${s.code}')"
+        style="width:100%;padding:8px;border-radius:8px;border:1px solid var(--border);background:rgba(255,255,255,0.03);color:var(--muted);cursor:pointer;font-size:11px;letter-spacing:.06em;text-align:center;transition:background .15s">
+        ${isExpanded ? '▲ Hide details' : '▼ Student details'}
+      </button>
+
+      <!-- Detail section — lazy: only rendered when expanded -->
+      <div id="sd-${s.code}"
+        style="margin-top:10px;padding:14px;background:rgba(255,255,255,0.02);border:1px solid var(--border);border-radius:8px;display:${isExpanded?'block':'none'}">
+        ${detailHTML}
+      </div>
+
+    </div>`;
+  }).join('');
+}
+
+// ── TEACHER HOURS SUMMARY ────────────────────────────────
+function buildPayrollFromSheets(payrollData) {
+  const keys = Object.keys(payrollData).sort((a, b) => {
+    // Sort by year+month descending e.g. June2026 > May2026
+    const months = ['January','February','March','April','May','June',
+                    'July','August','September','October','November','December'];
+    const parse = k => {
+      const m = k.match(/([A-Za-z]+)(\d+)/);
+      return m ? parseInt(m[2]) * 100 + months.indexOf(m[1]) : 0;
+    };
+    return parse(b) - parse(a);
+  });
+
+  const sel = document.getElementById('payroll-month');
+  if (!sel) return;
+  const months = ['January','February','March','April','May','June',
+                  'July','August','September','October','November','December'];
+  sel.innerHTML = keys.map(k => {
+    const m = k.match(/([A-Za-z]+)(\d+)/);
+    const label = m ? m[1] + ' ' + m[2] : k;
+    return `<option value="${k}">${label}</option>`;
+  }).join('');
+
+  G.payrollData = payrollData;
+  renderPayroll();
+}
+
+function buildPayrollMonths(sessions) {
+  // Fallback if no payroll sheets — keep selector working
+  if (G.payrollData && Object.keys(G.payrollData).length > 0) return;
+  const monthSet = new Set();
+  sessions.forEach(s => {
+    if (!s.date) return;
+    const months = ['January','February','March','April','May','June',
+                    'July','August','September','October','November','December'];
+    const key = months[s.date.getMonth()] + s.date.getFullYear();
+    monthSet.add(key);
+  });
+  const keys = [...monthSet].sort().reverse();
+  const sel = document.getElementById('payroll-month');
+  if (!sel) return;
+  sel.innerHTML = keys.map(k => `<option value="${k}">${k.replace(/(\d{4})/, ' $1')}</option>`).join('');
+  G.payrollSessions = sessions;
+  renderPayroll();
+}
+
+function renderPayroll() {
+  const sel = document.getElementById('payroll-month');
+  if (!sel) return;
+  const selectedKey = sel.value;
+  if (!selectedKey) return;
+
+  // Use real payroll sheet data if available
+  if (G.payrollData && G.payrollData[selectedKey]) {
+    const list = G.payrollData[selectedKey]
+      .filter(t => t.lessons > 0)
+      .sort((a,b) => b.lessons - a.lessons);
+    const totalLessons = list.reduce((a,t) => a + t.lessons, 0);
+    const badge = document.getElementById('payroll-total');
+    if (badge) badge.textContent = Math.round(totalLessons) + ' lessons · ' + Math.round(totalLessons) + ' total';
+    const maxL = Math.max(...list.map(t=>t.lessons), 1);
+    const tb = document.getElementById('payroll-tbody');
+    if (!list.length) {
+      tb.innerHTML = '<tr><td colspan="6" style="text-align:center;padding:20px;color:var(--dim)">No data for this month</td></tr>';
+      return;
+    }
+    tb.innerHTML = list.map(t => {
+      const pct = totalLessons > 0 ? Math.round(t.lessons/totalLessons*100) : 0;
+      const barPct = Math.round(t.lessons/maxL*100);
+      const barCls = barPct>80?'pbar-ok':barPct>40?'pbar-warn':'pbar-danger';
+      return `<tr>
+        <td><div class="name">${t.name}</div></td>
+        <td class="mono">${t.lessons}</td>
+        <td class="mono" style="color:var(--dim)">—</td>
+        <td class="mono" style="color:var(--dim)">—</td>
+        <td><span style="font-family:'Geist Mono',monospace;font-size:14px;font-weight:600;color:var(--gold2)">${t.lessons}</span></td>
+        <td style="min-width:140px">
+          <div class="pbar-wrap">
+            <div class="pbar"><div class="pbar-fill ${barCls}" style="width:${barPct}%"></div></div>
+            <div class="pbar-val">${pct}%</div>
+          </div>
+        </td>
+      </tr>`;
+    }).join('');
+    return;
+  }
+}
+
+
+// ── LOGIN ─────────────────────────────────────────────────
+const PASSWORDS = ['AmericanLife2025'];
+
+function doLogin() {
+  const inp = document.getElementById('pw-input');
+  const err = document.getElementById('login-error');
+  const pw  = inp.value.trim();
+  if (PASSWORDS.includes(pw)) {
+    const overlay = document.getElementById('login-overlay');
+    overlay.style.transition = 'opacity .4s ease';
+    overlay.style.opacity = '0';
+    setTimeout(() => {
+      overlay.style.display = 'none';
+      loadDashboard();
+      setInterval(loadDashboard, 5 * 60 * 1000);
+    }, 400);
+  } else {
+    err.textContent = 'Incorrect password. Please try again.';
+    inp.classList.add('error');
+    inp.value = '';
+    setTimeout(() => { inp.classList.remove('error'); err.textContent = ''; }, 2000);
+  }
+}
+
+function togglePw() {
+  const inp = document.getElementById('pw-input');
+  const eye = document.getElementById('pw-eye');
+  if (inp.type === 'password') { inp.type = 'text'; eye.textContent = '🙈'; }
+  else { inp.type = 'password'; eye.textContent = '👁'; }
+  inp.focus();
+}
+
+// ── START ────────────────────────────────────────────────
+// Dashboard loads only after successful login (doLogin)
+</script>
+</body>
+</html>
